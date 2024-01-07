@@ -13,17 +13,17 @@ class CinemaManager {
     private val sessionsFilePath = "data/sessions.json"
 
     // Custom Serializer
-    val localDateTimeSerializer = JsonSerializer<LocalDateTime> { src, typeOfSrc, context ->
+    private val localDateTimeSerializer = JsonSerializer<LocalDateTime> { src, _, _ ->
         JsonPrimitive(src.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
     }
 
     // Custom Deserializer
-    val localDateTimeDeserializer = JsonDeserializer<LocalDateTime> { json, typeOfT, context ->
+    private val localDateTimeDeserializer = JsonDeserializer { json, _, _ ->
         LocalDateTime.parse(json.asJsonPrimitive.asString, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
     }
 
     // Configure Gson
-    val gson = GsonBuilder()
+    private val gson: Gson = GsonBuilder()
         .registerTypeAdapter(LocalDateTime::class.java, localDateTimeSerializer)
         .registerTypeAdapter(LocalDateTime::class.java, localDateTimeDeserializer)
         .create()
@@ -36,16 +36,16 @@ class CinemaManager {
     fun startApplication() {
         var input: String
         do {
-            println("Welcome to the Cinema Management System")
+            // println("Welcome to the Cinema Management System")
             println("1. Show all movies")
             println("2. Add new movie")
             println("3. Show all sessions")
             println("4. Add new session")
             println("5. Sell ticket")
             println("6. Return ticket")
-            println("7. Exit")
-            print("Only enter a number of chosen operation, without any additional symbols: ")
-            input = readlnOrNull() ?: ""
+            println("Press any other key to exit")
+            println("Only enter a number of chosen operation, without any additional symbols: ")
+            input = readln()
 
             println("\n------------------\n")
             when (input) {
@@ -58,7 +58,7 @@ class CinemaManager {
             }
             println("\n------------------\n")
 
-        } while (input != "7")
+        } while (input in "123456" && input != "")
     }
 
     private fun printMovies() {
@@ -110,44 +110,63 @@ class CinemaManager {
     }
 
     private fun sellTicket() {
+        // print all existing session
         for (i in 0..<sessions.size) {
             println("$i. ${sessions[i]}")
         }
-        println("Enter session id:")
-        val sessionId = readln().toInt()
-        if (sessionId < sessions.size) {
+        try {
+            // read session
+            println("Enter the number associated with chosen session:")
+            val sessionId = readln().toInt()
             val session = sessions[sessionId]
             session.showAvailableSeats()
-            println("Enter seat row:")
+
+            // read seat row
+            println("Enter seat row (0-${session.rows - 1}):")
             val seatRow = readln().toInt()
-            println("Enter seat column")
+
+            // read seat column
+            println("Enter seat column (0-${session.columns - 1})")
             val seatColumn = readln().toInt()
 
             session.sellTicket(seatRow, seatColumn)
-        } else {
-            println("Session does not exist")
+        } catch (e: Throwable) {
+            println("Incorrect input")
         }
 
         saveSessions()
     }
 
     private fun returnTicket() {
+        // print all existing session
         for (i in 0..<sessions.size) {
             println("$i. ${sessions[i]}")
         }
-        println("Enter session id:")
-        val sessionId = readln().toInt()
-        if (sessionId < sessions.size) {
+        try {
+            // read session
+            println("Enter the number associated with chosen session:")
+            val sessionId = readln().toInt()
             val session = sessions[sessionId]
+
+            // if session has already started we return
+            if (session.startTime < LocalDateTime.now()) {
+                println("This session has already started, you cannot return ticket.")
+                return
+            }
+
             session.showAvailableSeats()
-            println("Enter seat row:")
+
+            // read seat row
+            println("Enter seat row (0-${session.rows - 1}):")
             val seatRow = readln().toInt()
-            println("Enter seat column")
+
+            // read seat column
+            println("Enter seat column (0-${session.columns - 1})")
             val seatColumn = readln().toInt()
 
             session.returnTicket(seatRow, seatColumn)
-        } else {
-            println("Session does not exist")
+        } catch (e: Throwable) {
+            println("Incorrect input")
         }
 
         saveSessions()
@@ -175,13 +194,9 @@ class CinemaManager {
     }
 
     private fun saveSessions() {
-        sortSessions()
+        sessions.sortBy { it.startTime }
         val json = gson.toJson(sessions)
         File(sessionsFilePath).writeText(json)
-    }
-
-    private fun sortSessions() {
-        sessions.sortBy { x -> x.startTime}
     }
 
     private fun canAddThisSessionTime(start: LocalDateTime, end: LocalDateTime): Boolean {

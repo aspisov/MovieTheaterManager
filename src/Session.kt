@@ -1,9 +1,9 @@
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-data class Session(val movie: Movie, var startTime:LocalDateTime, var endTime:LocalDateTime) {
-    private val rows = 5
-    private val columns = 10
+data class Session(val movie: Movie, var startTime: LocalDateTime, var endTime: LocalDateTime) {
+    val rows = 5
+    val columns = 10
     private val seatIsBooked = Array(rows) { BooleanArray(columns) { false } }
 
     fun sellTicket(row: Int, column: Int) {
