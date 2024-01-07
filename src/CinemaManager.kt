@@ -36,15 +36,15 @@ class CinemaManager {
     fun startApplication() {
         var input: String
         do {
-            // println("Welcome to the Cinema Management System")
-            println("1. Show all movies")
-            println("2. Add new movie")
-            println("3. Show all sessions")
-            println("4. Add new session")
-            println("5. Sell ticket")
-            println("6. Return ticket")
-            println("Press any other key to exit")
-            println("Only enter a number of chosen operation, without any additional symbols: ")
+            println("Welcome to the Cinema Management System")
+            println("\t1. Show all movies")
+            println("\t2. Add new movie")
+            println("\t3. Show all sessions")
+            println("\t4. Add new session")
+            println("\t5. Sell ticket")
+            println("\t6. Return ticket")
+            println("\tPress any other key to exit")
+            printInputMessage("Only enter a number of chosen operation, without any additional symbols:")
             input = readln()
 
             println("\n------------------\n")
@@ -63,49 +63,58 @@ class CinemaManager {
 
     private fun printMovies() {
         if (movies.size == 0) {
-            println("You don't have any movies yet.")
+            printErrorMessage("You don't have any movies yet.")
         }
         movies.forEach { println(it) }
     }
 
     private fun addMovie() {
-        println("Enter movie name:")
+        printInputMessage("Enter movie name:")
         val name = readln()
-        println("Enter movie duration in minutes:")
-        val duration = readln().toInt()
-        val movie = Movie(name, duration)
-        movies.add(movie)
 
-        saveMovies()
+        try {
+            printInputMessage("Enter movie duration in minutes:")
+            val duration = readln().toInt()
+            val movie = Movie(name, duration)
+            movies.add(movie)
+
+            saveMovies()
+        } catch (e: Throwable) {
+            printErrorMessage()
+        }
     }
 
     private fun printSessions() {
         if (sessions.size == 0) {
-            println("You don't have any sessions yet.")
+            printErrorMessage("You don't have any sessions yet.")
         }
         sessions.forEach { println(it) }
     }
 
     private fun addSession() {
-        println("Choose a movie by entering the number:")
-        movies.forEachIndexed { index, movie -> println("$index: $movie") }
-        val movieIndex = readln().toInt()
-        val movie = movies[movieIndex]
+        try {
+            printInputMessage("Choose a movie by entering a number without any additional symbols:")
+            movies.forEachIndexed { index, movie -> println("$index: $movie") }
+            val movieIndex = readln().toInt()
+            val movie = movies[movieIndex]
 
-        println("Enter session time in this format ('HH:mm dd.MM.yyyy'):")
-        val sessionTime = readln()
+            printInputMessage("Enter session time in this format ('HH:mm dd.MM.yyyy'):")
+            val sessionTime = readln()
 
-        val formatter = DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy")
-        val sessionStartTime = LocalDateTime.parse(sessionTime, formatter)
-        val sessionEndTime = sessionStartTime.plusMinutes(movie.duration.toLong())
+            val formatter = DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy")
+            val sessionStartTime = LocalDateTime.parse(sessionTime, formatter)
+            val sessionEndTime = sessionStartTime.plusMinutes(movie.duration.toLong())
 
-        if (canAddThisSessionTime(sessionStartTime, sessionEndTime)) {
-            val session = Session(movie, sessionStartTime, sessionEndTime)
-            sessions.add(session)
-            saveSessions()
-            println("Session successfully added.")
-        } else {
-            println("Error! Session time overlaps with other sessions. Try different time.")
+            if (canAddThisSessionTime(sessionStartTime, sessionEndTime)) {
+                val session = Session(movie, sessionStartTime, sessionEndTime)
+                sessions.add(session)
+                saveSessions()
+                println("Session successfully added.")
+            } else {
+                printErrorMessage("Error! Session time overlaps with other sessions. Try different time.")
+            }
+        } catch (e: Throwable) {
+            printErrorMessage()
         }
     }
 
@@ -116,22 +125,29 @@ class CinemaManager {
         }
         try {
             // read session
-            println("Enter the number associated with chosen session:")
+            printInputMessage("Enter the number associated with chosen session:")
             val sessionId = readln().toInt()
             val session = sessions[sessionId]
+
+            // if session has already started we return
+            if (session.startTime < LocalDateTime.now()) {
+                printErrorMessage("This session has already started, you cannot purchase a ticket.")
+                return
+            }
+
             session.showAvailableSeats()
 
             // read seat row
-            println("Enter seat row (0-${session.rows - 1}):")
+            printInputMessage("Enter seat row (0-${session.rows - 1}):")
             val seatRow = readln().toInt()
 
             // read seat column
-            println("Enter seat column (0-${session.columns - 1})")
+            printInputMessage("Enter seat column (0-${session.columns - 1})")
             val seatColumn = readln().toInt()
 
             session.sellTicket(seatRow, seatColumn)
         } catch (e: Throwable) {
-            println("Incorrect input")
+            printErrorMessage()
         }
 
         saveSessions()
@@ -144,29 +160,29 @@ class CinemaManager {
         }
         try {
             // read session
-            println("Enter the number associated with chosen session:")
+            printInputMessage("Enter the number associated with chosen session:")
             val sessionId = readln().toInt()
             val session = sessions[sessionId]
 
             // if session has already started we return
             if (session.startTime < LocalDateTime.now()) {
-                println("This session has already started, you cannot return ticket.")
+                printErrorMessage("This session has already started, you cannot return a ticket.")
                 return
             }
 
             session.showAvailableSeats()
 
             // read seat row
-            println("Enter seat row (0-${session.rows - 1}):")
+            printInputMessage("Enter seat row (0-${session.rows - 1}):")
             val seatRow = readln().toInt()
 
             // read seat column
-            println("Enter seat column (0-${session.columns - 1})")
+            printInputMessage("Enter seat column (0-${session.columns - 1})")
             val seatColumn = readln().toInt()
 
             session.returnTicket(seatRow, seatColumn)
         } catch (e: Throwable) {
-            println("Incorrect input")
+            printErrorMessage()
         }
 
         saveSessions()
@@ -208,5 +224,13 @@ class CinemaManager {
             }
         }
         return true
+    }
+
+    private fun printErrorMessage(message: String = "Error! Incorrect input.") {
+        println("\u001B[31m$message\u001B[0m")
+    }
+
+    private fun printInputMessage(message: String) {
+        println("\u001B[33m$message\u001B[0m")
     }
 }
