@@ -43,6 +43,7 @@ class CinemaManager {
             println("\t4. Add new session")
             println("\t5. Sell ticket")
             println("\t6. Return ticket")
+            println("\t7. Scan ticket")
             println("\tPress any other key to exit")
             printInputMessage("Only enter a number of chosen operation, without any additional symbols:")
             input = readln()
@@ -55,10 +56,11 @@ class CinemaManager {
                 "4" -> addSession()
                 "5" -> sellTicket()
                 "6" -> returnTicket()
+                "7" -> scanTicket()
             }
             println("\n------------------\n")
 
-        } while (input in "123456" && input != "")
+        } while (input in "1234567" && input != "")
     }
 
     private fun printMovies() {
@@ -119,41 +121,30 @@ class CinemaManager {
     }
 
     private fun sellTicket() {
-        // print all existing session
-        for (i in 0..<sessions.size) {
-            println("$i. ${sessions[i]}")
-        }
-        try {
-            // read session
-            printInputMessage("Enter the number associated with chosen session:")
-            val sessionId = readln().toInt()
-            val session = sessions[sessionId]
+        val data = chooseSessionAndSeat("sell") ?: return
+        val (session, seatRow, seatColumn) = data
 
-            // if session has already started we return
-            if (session.startTime < LocalDateTime.now()) {
-                printErrorMessage("This session has already started, you cannot purchase a ticket.")
-                return
-            }
-
-            session.showAvailableSeats()
-
-            // read seat row
-            printInputMessage("Enter seat row (0-${session.rows - 1}):")
-            val seatRow = readln().toInt()
-
-            // read seat column
-            printInputMessage("Enter seat column (0-${session.columns - 1})")
-            val seatColumn = readln().toInt()
-
-            session.sellTicket(seatRow, seatColumn)
-        } catch (e: Throwable) {
-            printErrorMessage()
-        }
-
+        println(session.sellTicket(seatRow, seatColumn))
         saveSessions()
     }
 
     private fun returnTicket() {
+        val data = chooseSessionAndSeat("return") ?: return
+        val (session, seatRow, seatColumn) = data
+
+        println(session.returnTicket(seatRow, seatColumn))
+        saveSessions()
+    }
+
+    private fun scanTicket() {
+        val data = chooseSessionAndSeat("scan") ?: return
+        val (session, seatRow, seatColumn) = data
+
+        println(session.scanTicket(seatRow, seatColumn))
+        saveSessions()
+    }
+
+    private fun chooseSessionAndSeat(operation: String): Triple<Session, Int, Int>? {
         // print all existing session
         for (i in 0..<sessions.size) {
             println("$i. ${sessions[i]}")
@@ -164,10 +155,27 @@ class CinemaManager {
             val sessionId = readln().toInt()
             val session = sessions[sessionId]
 
-            // if session has already started we return
-            if (session.startTime < LocalDateTime.now()) {
-                printErrorMessage("This session has already started, you cannot return a ticket.")
-                return
+            // managing error that are connected to time depending on the type of desired operation
+            if (operation == "scan") {
+                if (LocalDateTime.now() < session.startTime.minusHours(1)) {
+                    printErrorMessage("The ticket can be scanned no earlier than 1 hour before the session.")
+                    return null
+                } else if (LocalDateTime.now() > session.endTime) {
+                    printErrorMessage("This session has already finished.")
+                    return null
+                }
+            } else if (operation == "return") {
+                if (LocalDateTime.now() > session.endTime) {
+                    printErrorMessage("This session has already ended, you cannot return this ticket.")
+                    return null
+                } else if (LocalDateTime.now() > session.startTime) {
+                    printErrorMessage("This session has already started, you cannot return this ticket")
+                }
+            } else if (operation == "sell") {
+                if (LocalDateTime.now() > session.endTime) {
+                    printErrorMessage("This session has already ended, you cannot buy this ticket.")
+                    return null
+                }
             }
 
             session.showAvailableSeats()
@@ -177,15 +185,14 @@ class CinemaManager {
             val seatRow = readln().toInt()
 
             // read seat column
-            printInputMessage("Enter seat column (0-${session.columns - 1})")
+            printInputMessage("Enter seat column (0-${session.columns - 1}):")
             val seatColumn = readln().toInt()
 
-            session.returnTicket(seatRow, seatColumn)
+            return Triple(session, seatRow, seatColumn)
         } catch (e: Throwable) {
             printErrorMessage()
+            return null
         }
-
-        saveSessions()
     }
 
     private fun loadMovies() {
