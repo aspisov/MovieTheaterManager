@@ -16,9 +16,9 @@ class CinemaManager {
         do {
             println("\nThis is the Main Menu")
             println("Choose a command from below:")
-            println("\t1. Show all movies")
+            println("\t1. Show all movies (edit)")
             println("\t2. Add new movie")
-            println("\t3. Show all sessions")
+            println("\t3. Show all sessions (edit)")
             println("\t4. Add new session")
             println("\t5. Sell ticket")
             println("\t6. Return ticket")
@@ -29,9 +29,9 @@ class CinemaManager {
 
             println("\n------------------")
             when (input) {
-                "1" -> printMovies()
+                "1" -> printAndEditMovies()
                 "2" -> addMovie()
-                "3" -> printSessions()
+                "3" -> printAndEditSessions()
                 "4" -> addSession()
                 "5" -> sellTicket()
                 "6" -> returnTicket()
@@ -41,11 +41,35 @@ class CinemaManager {
         } while (input in "1234567" && input != "")
     }
 
-    private fun printMovies() {
+    private fun printAndEditMovies() {
         if (movies.size == 0) {
             printErrorMessage("You don't have any movies yet.")
+            return
         }
-        movies.forEach { println(it) }
+        movies.forEachIndexed { index, movie -> println("$index: $movie") }
+        try {
+            printInputMessage("To edit movie enter it's index or enter anything else to return back to main menu.")
+            var index = readln().toInt()
+            while (index < 0 || index > movies.size - 1) {
+                printErrorMessage("Error! This index doesn't seem to exit.")
+                printInputMessage("To edit movie enter it's index or enter anything else to return back to main menu.")
+                index = readln().toInt()
+            }
+            printInputMessage("To delete this movies (${movies[index].name}) enter 'DELETE' or enter new description")
+            val input = readln()
+            if (input == "DELETE") {
+                println("Movie ${movies[index].name} successfully removed.")
+                sessions.removeIf{ it.movie == movies[index] }
+                movies.removeAt(index)
+                dataWriter.saveMovies(movies)
+                dataWriter.saveSessions(sessions)
+                return
+            }
+            movies[index].changeDescription(input)
+            println("Successfully changed description of movie '${movies[index].name}'.")
+            dataWriter.saveMovies(movies)
+        } catch (_: Throwable) {
+        }
     }
 
     private fun addMovie() {
@@ -77,11 +101,36 @@ class CinemaManager {
         }
     }
 
-    private fun printSessions() {
+    private fun printAndEditSessions() {
         if (sessions.size == 0) {
             printErrorMessage("You don't have any sessions yet.")
+            return
         }
-        sessions.forEach { println(it) }
+        sessions.forEachIndexed { index, session -> println("$index: $session") }
+        try {
+            printInputMessage("To edit session enter it's index or enter anything else to return back to main menu.")
+            var index = readln().toInt()
+            while (index < 0 || index > sessions.size - 1) {
+                printErrorMessage("Error! This index doesn't seem to exit.")
+                printInputMessage("To edit session enter it's index or enter anything else to return back to main menu.")
+                index = readln().toInt()
+            }
+            printInputMessage("To delete this session with index '$index' enter 'DELETE' or to edit enter 'EDIT'.")
+            val input = readln()
+            when (input) {
+                "DELETE" -> {
+                    sessions.removeAt(index)
+                    dataWriter.saveSessions(sessions)
+                }
+
+                "EDIT" -> {
+                    sessions.removeAt(index)
+                    addSession()
+                }
+            }
+
+        } catch (_: Throwable) {
+        }
     }
 
     private fun addSession() {
