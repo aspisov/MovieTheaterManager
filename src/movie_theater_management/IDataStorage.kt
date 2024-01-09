@@ -1,10 +1,23 @@
-import com.google.gson.*
+package movie_theater_management
+
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonPrimitive
+import com.google.gson.JsonSerializer
 import com.google.gson.reflect.TypeToken
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-class SaveFileDataWriter {
+interface IDataStorage {
+    fun loadMovies(): List<Movie>
+    fun saveMovies(movies: List<Movie>)
+    fun loadSessions(): List<Session>
+    fun saveSessions(sessions: List<Session>)
+}
+
+class JSONDataStorage : IDataStorage {
     // path to JSON files
     private val moviesFilePath = "data/movies.json"
     private val sessionsFilePath = "data/sessions.json"
@@ -25,29 +38,30 @@ class SaveFileDataWriter {
         .registerTypeAdapter(LocalDateTime::class.java, localDateTimeDeserializer)
         .create()
 
-    fun loadMovies(movies: MutableList<Movie>) {
+    override fun loadMovies(): List<Movie> {
         val file = File(moviesFilePath)
         if (file.exists()) {
             val type = object : TypeToken<List<Movie>>() {}.type
-            movies.addAll(gson.fromJson(file.readText(), type))
+            return gson.fromJson(file.readText(), type)
         }
+        return emptyList()
     }
 
-    fun saveMovies(movies: MutableList<Movie>) {
+    override fun saveMovies(movies: List<Movie>) {
         val json = gson.toJson(movies)
         File(moviesFilePath).writeText(json)
     }
 
-    fun loadSessions(sessions: MutableList<Session>) {
+    override fun loadSessions(): List<Session> {
         val file = File(sessionsFilePath)
         if (file.exists()) {
             val type = object : TypeToken<List<Session>>() {}.type
-            sessions.addAll(gson.fromJson(file.readText(), type))
+            return gson.fromJson(file.readText(), type)
         }
+        return emptyList()
     }
 
-    fun saveSessions(sessions: MutableList<Session>) {
-        sessions.sortBy { it.startTime }
+    override fun saveSessions(sessions: List<Session>) {
         val json = gson.toJson(sessions)
         File(sessionsFilePath).writeText(json)
     }
