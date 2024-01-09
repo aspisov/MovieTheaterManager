@@ -41,6 +41,10 @@ class SessionManager(private val dataStorage: IDataStorage) {
         return sessions
     }
 
+    fun listActiveSessions(): List<Session> {
+        return sessions.filter { it.endTime > LocalDateTime.now() }
+    }
+
     fun canAddThisSessionTime(start: LocalDateTime, end: LocalDateTime): Boolean {
         for (session in sessions) {
             if (start > session.endTime || end < session.startTime) {

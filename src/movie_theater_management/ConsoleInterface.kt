@@ -15,13 +15,14 @@ class ConsoleInterface(
             input = readln()
 
             when (input) {
-                "1" -> printAndEditMovies()
+                "1" -> printEditMovies()
                 "2" -> addMovie()
-                "3" -> printAndEditSessions()
-                "4" -> addSession()
-                "5" -> sellTicket()
-                "6" -> returnTicket()
-                "7" -> scanTicket()
+                "3" -> printEditActiveSessions()
+                "4" -> printSessions()
+                "5" -> addSession()
+                "6" -> sellTicket()
+                "7" -> returnTicket()
+                "8" -> scanTicket()
             }
         } while (input in "1234567")
     }
@@ -31,25 +32,26 @@ class ConsoleInterface(
         println("Choose a command from below:")
         println("\t1. Show all movies (edit)")
         println("\t2. Add new movie")
-        println("\t3. Show all sessions (edit)")
-        println("\t4. Add new session")
-        println("\t5. Sell ticket")
-        println("\t6. Return ticket")
-        println("\t7. Scan ticket")
+        println("\t3. Show and edit active sessions")
+        println("\t4. Show all sessions (sessions that have already ended and active sessions)")
+        println("\t5. Add new session")
+        println("\t6. Sell ticket")
+        println("\t7. Return ticket")
+        println("\t8. Scan ticket")
         println("\tEnter any other input to go back to registration menu.")
         printInputMessage("Only enter an index of chosen operation without any additional symbols:")
     }
 
-    private fun printAndEditMovies() {
+    private fun printEditMovies() {
         val movies = movieManager.listMovies()
         if (movies.isEmpty()) {
             printErrorMessage("No movies available.")
             return
         }
         movies.forEachIndexed { index, movie -> println("$index: $movie") }
+
         printInputMessage("Enter the index of the movie to edit, or anything else to return:")
-        val input = readln()
-        val index = input.toIntOrNull()
+        val index = readln().toIntOrNull()
         if (index == null || index !in movies.indices) {
             return
         }
@@ -81,8 +83,15 @@ class ConsoleInterface(
     private fun addMovie() {
         println("Enter movie name:")
         val name = readln()
-        println("Enter movie duration in minutes:")
-        val duration = readln().toIntOrNull() ?: return printErrorMessage("Invalid duration")
+
+        // read duration
+        var duration: Int? = null
+        while (duration == null) {
+            println("Enter movie duration in minutes:")
+            duration = readln().toIntOrNull()
+            if (duration == null) printErrorMessage()
+        }
+
         println("Enter the description of this movie in one line:")
         val description = readln()
 
@@ -91,30 +100,34 @@ class ConsoleInterface(
         println("Movie added successfully.")
     }
 
-    private fun printAndEditSessions() {
-        val sessions = sessionManager.listSessions()
-        if (sessions.isEmpty()) {
-            printErrorMessage("No sessions available.")
-            return
-        }
-        sessions.forEachIndexed { index, session -> println("$index: $session") }
+    private fun printEditActiveSessions() {
+        val sessions = printSessions(true) ?: return
 
         printInputMessage("Enter the index of the session to edit, or anything else to return:")
-        val input = readln()
-        val index = input.toIntOrNull()
+        val index = readln().toIntOrNull()
         if (index == null || index !in sessions.indices) {
             return
         }
 
         // option to delete this movie
         printInputMessage("Enter 'DELETE' to delete this movie or press enter to start editing")
-        val delete = readln()
-        if (delete == "DELETE") {
+        val input = readln()
+        if (input == "DELETE") {
             sessionManager.deleteSession(index)
-            return
+            println("Session successfully removed.")
         }
-
         addSession()
+        sessionManager.deleteSession(index)
+    }
+
+    private fun printSessions(showOnlyActive: Boolean = false): List<Session>? {
+        val sessions = if (showOnlyActive) sessionManager.listActiveSessions() else sessionManager.listSessions()
+        if (sessions.isEmpty()) {
+            printErrorMessage("No sessions available.")
+            return null
+        }
+        sessions.forEachIndexed { index, session -> println("$index: $session") }
+        return sessions
     }
 
     private fun addSession() {
