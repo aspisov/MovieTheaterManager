@@ -19,7 +19,7 @@ fun main() {
 
     var input: String
     while (true) {
-        println("\n--------- Welcome to movie_theater_management.Movie Theater Management App ---------")
+        println("\n--------- Welcome to Movie Theater Management App ---------")
         println("1. Register")
         println("2. Login")
         println("3. Exit")
@@ -39,7 +39,7 @@ fun main() {
         }
 
         if (success) {
-            val dataStorage = JSONDataStorage() // Implement this class based on IDataStorage
+            val dataStorage = JSONDataStorage()
             val movieManager = MovieManager(dataStorage)
             val sessionManager = SessionManager(dataStorage)
             val consoleInterface = ConsoleInterface(movieManager, sessionManager)

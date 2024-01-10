@@ -1,0 +1,141 @@
+@startuml
+
+package user_management {
+
+    interface PasswordService {
+        + generateSalt() : String
+        + hashPassword(password : String, salt : String) : String
+    }
+
+    class SHA256PasswordService {
+        + generateSalt() : String
+        + hashPassword(password : String, salt : String) : String
+    }
+
+    class User {
+        - username : String
+        - hashedPassword : String
+        - salt : String
+    }
+
+    interface UserDataRepository {
+        + loadUsers() : MutableMap<String, User>
+        + saveUsers(users : Map<String, User>) : void
+    }
+
+    class FileUserDataRepository {
+        - storageFile : File
+        + loadUsers() : MutableMap<String, User>
+        + saveUsers(users : Map<String, User>) : void
+    }
+
+    class UserInterface {
+        - userService : UserService
+        + runSignUp() : Boolean
+        + runSignIn() : Boolean
+    }
+
+    class UserService {
+        - userDataRepository : UserDataRepository
+        - passwordService : PasswordService
+        - users : MutableMap<String, User>
+        + register(username : String, password : String) : Boolean
+        + login(username : String, password : String) : Boolean
+    }
+
+    SHA256PasswordService ..|> PasswordService
+    FileUserDataRepository ..|> UserDataRepository
+    UserService --> PasswordService : uses
+    UserService --> UserDataRepository : uses
+    UserInterface --> UserService : uses
+}
+
+package movie_theater_management {
+
+    class Movie {
+        - name : String
+        - duration : Int
+        - description : String
+        + toString() : String
+    }
+
+    class MovieManager {
+        - dataStorage : IDataStorage
+        - movies : List<Movie>
+
+        + addMovie(movie : Movie) : void
+        + editMovie(index : Int, newMovie : Movie) : void
+        + deleteMovie(index : Int) : void
+        + listMovies() : List<Movie>
+    }
+
+    class Session {
+        - movie : Movie
+        - startTime : LocalDateTime
+        - endTime : LocalDateTime
+        - rows : int
+        - columns : int
+        - seats : Array
+        + bookSeat(row : Int, column : Int) : String
+        + freeSeat(row : Int, column : Int) : String
+        + scanSeat(row : Int, column : Int) : String
+        + displaySeats() : void
+        + rowExists(row : Int) : Boolean
+        + columnExists(column : Int) : Boolean
+        + toString() : String
+    }
+
+    class SessionManager {
+        - dataStorage : IDataStorage
+        - sessions : List<Session>
+        + addSession(session : Session) : void
+        + deleteSession(index : Int) : void
+        + deleteSessionsByMovie(movie : Movie) : void
+        + listSessions() : List<Session>
+        + listActiveSessions() : List<Session>
+        + canAddThisSessionTime(start : LocalDateTime, end : LocalDateTime) : Boolean
+    }
+
+    interface IDataStorage {
+        + loadMovies() : List<Movie>
+        + saveMovies(movies : List<Movie>) : void
+        + loadSessions() : List<Session>
+        + saveSessions(sessions : List<Session>) : void
+    }
+
+    class JSONDataStorage {
+            - moviesFilePath : String
+            - sessionsFilePath : String
+            - localDateTimeSerializer : JsonSerializer<LocalDateTime>
+            - localDateTimeDeserializer : JsonDeserializer<LocalDateTime>
+            - gson : Gson
+
+            + loadMovies() : List<Movie>
+            + saveMovies(movies : List<Movie>) : void
+            + loadSessions() : List<Session>
+            + saveSessions(sessions : List<Session>) : void
+        }
+
+    JSONDataStorage ..|> IDataStorage
+    MovieManager --> "uses" IDataStorage
+    SessionManager --> "uses" IDataStorage
+    SessionManager --> "*" Session : manages
+    Session o-- Movie : contains
+    ConsoleInterface --> MovieManager : uses
+    ConsoleInterface --> SessionManager : uses
+}
+
+class Main {
+    {static} void main()
+}
+
+Main ..> "uses" UserInterface : <<creates>>
+Main ..> "uses" UserService : <<creates>>
+Main ..> "uses" FileUserDataRepository : <<creates>>
+Main ..> "uses" SHA256PasswordService : <<creates>>
+Main ..> "uses" JSONDataStorage : <<creates>>
+Main ..> "uses" MovieManager : <<creates>>
+Main ..> "uses" SessionManager : <<creates>>
+Main ..> "uses" ConsoleInterface : <<creates>>
+
+@enduml
