@@ -11,7 +11,7 @@ class SessionManager(private val dataStorage: IDataStorage) {
 
     fun addSession(session: Session) {
         sessions.add(session)
-        sessions.sortedBy { it.startTime }
+        sessions.sortBy { it.startTime }
         dataStorage.saveSessions(sessions)
     }
 

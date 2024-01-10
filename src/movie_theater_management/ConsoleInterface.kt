@@ -158,14 +158,13 @@ class ConsoleInterface(
 
     private fun chooseMovie(): Movie {
         val movies = movieManager.listMovies()
-        printInputMessage("Choose a movie by entering a number without any additional symbols:")
         movies.forEachIndexed { index, movie -> println("$index: $movie") }
-        var index = readln().toIntOrNull()
 
+        var index: Int? = null
         while (index == null || index !in movies.indices) {
-            printErrorMessage("Error! Incorrect index.")
-            printInputMessage("Enter an index of the movie you chose:")
+            printInputMessage("Enter an index of the movie you want to choose:")
             index = readln().toIntOrNull()
+            if (index == null || index !in movies.indices) printErrorMessage("Error! Incorrect index.")
         }
         return movies[index]
     }
