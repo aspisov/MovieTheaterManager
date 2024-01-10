@@ -83,6 +83,10 @@ class ConsoleInterface(
     private fun addMovie() {
         println("Enter movie name:")
         val name = readln()
+        if (movieManager.movieAlreadyExist(name)) {
+            printErrorMessage("Error! This movie already exists.")
+            return
+        }
 
         // read duration
         var duration: Int? = null
@@ -172,12 +176,6 @@ class ConsoleInterface(
     private fun sellTicket() {
         val session = selectSession() ?: return
 
-        // if session ended return
-        if (LocalDateTime.now() > session.endTime) {
-            printErrorMessage("This session has already ended, you cannot buy this ticket.")
-            return
-        }
-
         val seat = selectSeat(session)
 
         val result = session.bookSeat(seat.first, seat.second)
@@ -187,11 +185,8 @@ class ConsoleInterface(
     private fun returnTicket() {
         val session = selectSession() ?: return
 
-        // if session started or ended return
-        if (LocalDateTime.now() > session.endTime) {
-            printErrorMessage("This session has already ended, you cannot return this ticket.")
-            return
-        } else if (LocalDateTime.now() > session.startTime) {
+        // if session started return
+        if (LocalDateTime.now() > session.startTime) {
             printErrorMessage("This session has already started, you cannot return this ticket")
             return
         }
@@ -205,12 +200,9 @@ class ConsoleInterface(
     private fun scanTicket() {
         val session = selectSession() ?: return
 
-        // if more than 1 hour before session or session already ended return
+        // if more than 1 hour before session return
         if (LocalDateTime.now() < session.startTime.minusHours(1)) {
             printErrorMessage("The ticket can be scanned no earlier than 1 hour before the session.")
-            return
-        } else if (LocalDateTime.now() > session.endTime) {
-            printErrorMessage("This session has already finished.")
             return
         }
 
@@ -221,7 +213,7 @@ class ConsoleInterface(
     }
 
     private fun selectSession(): Session? {
-        val sessions = sessionManager.listSessions()
+        val sessions = sessionManager.listActiveSessions()
         if (sessions.isEmpty()) {
             printErrorMessage("No sessions available.")
             return null

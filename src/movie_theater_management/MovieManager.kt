@@ -33,4 +33,8 @@ class MovieManager(private val dataStorage: IDataStorage) {
     fun listMovies(): List<Movie> {
         return movies
     }
+
+    fun movieAlreadyExist(name: String): Boolean {
+        return movies.find { it.name == name } != null
+    }
 }
