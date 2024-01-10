@@ -31,6 +31,9 @@ The main menu contains 8 options:
 
 To choose an option, enter its index number. Selecting an option not listed will return you to the registration menu.
 
+To further enhance your understanding of this application you are welcome to look at class and use-case diagrams in
+`/diagrams` directory.
+
 ## Movies and sessions data
 
 All data about movies and session is stored in `/data` in JSON.<br>
