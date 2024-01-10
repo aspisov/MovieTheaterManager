@@ -1,5 +1,6 @@
 package movie_theater_management
 
+import movie_theater_management.data_storage.IDataStorage
 import java.time.LocalDateTime
 
 class SessionManager(private val dataStorage: IDataStorage) {

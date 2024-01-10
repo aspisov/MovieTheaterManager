@@ -1,5 +1,7 @@
 package movie_theater_management
 
+import movie_theater_management.data_storage.IDataStorage
+
 class MovieManager(private val dataStorage: IDataStorage) {
     private val movies = mutableListOf<Movie>()
 

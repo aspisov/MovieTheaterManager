@@ -1,4 +1,4 @@
-package movie_theater_management
+package movie_theater_management.data_storage
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -6,16 +6,11 @@ import com.google.gson.JsonDeserializer
 import com.google.gson.JsonPrimitive
 import com.google.gson.JsonSerializer
 import com.google.gson.reflect.TypeToken
+import movie_theater_management.Movie
+import movie_theater_management.Session
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-
-interface IDataStorage {
-    fun loadMovies(): List<Movie>
-    fun saveMovies(movies: List<Movie>)
-    fun loadSessions(): List<Session>
-    fun saveSessions(sessions: List<Session>)
-}
 
 class JSONDataStorage : IDataStorage {
     // path to JSON files
