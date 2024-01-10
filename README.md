@@ -42,3 +42,8 @@ The reasons why JSON was chosen for data storage are:
 1. JSON can represent more complex and hierarchical data structures
 2. JSON is more human-readable and easier to work with compared to XML
 3. JSON has simpler parsing and serialization in Kotlin especially compared to XML
+
+## User registration
+
+Password encryption is implemented using hash and salt, inspired by concepts covered in this video:<br>
+https://youtu.be/NuyzuNBFWxQ?si=_3KpfyEsHI0Fr3Yp
