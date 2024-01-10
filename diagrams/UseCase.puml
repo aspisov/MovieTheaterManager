@@ -1,0 +1,31 @@
+@startuml
+left to right direction
+actor Employee
+
+rectangle "Movie Theater Management System" {
+    usecase "Register/Login" as UC1
+    usecase "Scan Ticket" as UC9
+    usecase "Return Ticket" as UC8
+    usecase "Sell Ticket" as UC7
+    usecase "Add Session" as UC6
+    usecase "Add Movie" as UC5
+    usecase "View Sessions" as UC4
+    usecase "View Movies" as UC3
+
+    usecase "Show/Delete/Edit Movies" as UC10
+    usecase "Show/Delete/Edit Sessions" as UC11
+}
+Employee --> UC1
+
+UC1 --> UC3
+UC1 --> UC4
+UC1 --> UC5
+UC1 --> UC6
+UC1 --> UC7
+UC1 --> UC8
+UC1 --> UC9
+
+UC3 --> UC10
+UC4 --> UC11
+
+@enduml
