@@ -3,15 +3,6 @@ import movie_theater_management.*
 import movie_theater_management.data_storage.JSONDataStorage
 import java.io.File
 
-//fun main() {
-//    val dataStorage = JSONDataStorage() // Implement this class based on IDataStorage
-//    val movieManager = MovieManager(dataStorage)
-//    val sessionManager = SessionManager(dataStorage)
-//    val consoleInterface = ConsoleInterface(movieManager, sessionManager)
-//
-//    consoleInterface.run()
-//}
-
 fun main() {
     val userDataRepository = FileUserDataRepository(File("data/userdata.txt"))
     val passwordService = SHA256PasswordService()

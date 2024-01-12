@@ -17,15 +17,15 @@ rectangle "Movie Theater Management System" {
 }
 Employee --> UC1
 
-UC1 --> UC3
-UC1 --> UC4
-UC1 --> UC5
-UC1 --> UC6
-UC1 --> UC7
-UC1 --> UC8
-UC1 --> UC9
+UC1 -- UC3
+UC1 -- UC4
+UC1 -- UC5
+UC1 -- UC6
+UC1 -- UC7
+UC1 -- UC8
+UC1 -- UC9
 
-UC3 --> UC10
-UC4 --> UC11
+UC3 -- UC10
+UC4 -- UC11
 
 @enduml

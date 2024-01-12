@@ -16,15 +16,6 @@ class SessionManager(private val dataStorage: IDataStorage) {
         dataStorage.saveSessions(sessions)
     }
 
-//    fun editSession(index: Int, newSession: Session) {
-//        if (index in sessions.indices) {
-//            sessions[index] = newSession
-//            dataStorage.saveSessions(sessions)
-//        } else {
-//            throw IllegalArgumentException("Invalid session index")
-//        }
-//    }
-
     fun deleteSession(index: Int) {
         if (index in sessions.indices) {
             sessions.removeAt(index)

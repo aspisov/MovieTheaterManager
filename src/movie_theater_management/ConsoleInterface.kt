@@ -67,12 +67,9 @@ class ConsoleInterface(
 
         printInputMessage("Enter new name for the movie or press enter to skip:")
         val name = readln()
-        //  printInputMessage("Enter new duration in minutes or press enter to skip:")
-        // val duration = readln().toIntOrNull() ?: movies[index].duration
         printInputMessage("Enter new description or press enter to skip:")
         val description = readln()
 
-        // val updatedMovie = Movie(name.ifBlank { movies[index].name }, duration, description.ifBlank { movies[index].description })
         val updatedMovie = Movie(name.ifBlank { movies[index].name },
             movies[index].duration,
             description.ifBlank { movies[index].description })
